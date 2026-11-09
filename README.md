@@ -22,6 +22,55 @@ Indica que la API responde; no comprueba MySQL ni el proveedor de correo.
 
 En Windows se puede utilizar `mvnw.cmd`.
 
+## Ejercicio 25: CRUDL de Emisora
+
+Además de la entidad `Usuario`, este fork implementa la entidad **Emisora** en todas las capas
+de la arquitectura hexagonal:
+
+| Capa | Componentes |
+|---|---|
+| Dominio | `EmisoraModel`, `GeneroEmisora`, value objects `EmisoraId`, `EmisoraNombre`, `BandaFm`, `BandaAm`, excepciones `InvalidEmisoraException`, `EmisoraNotFoundException`, `EmisoraAlreadyExistsException` |
+| Aplicación | Puertos de entrada (`CreateEmisoraUseCase`...), puertos de salida (`SaveEmisoraPort`...), comandos/consultas CQRS, `EmisoraApplicationMapper` y 5 servicios |
+| Adaptadores | `EmisoraRepositoryMySQL` (JDBC), DTO, entidad, mapper y excepción de persistencia |
+| Entrypoints | `EmisoraRestController` + `EmisoraRestControllerDocs` (Swagger), request/response, mapper y manejo de errores en `GlobalExceptionHandler` |
+
+Atributos: `nombre, canal, bandaFm, bandaAm, numLocutores, genero, horario, patrocinador, pais,
+descripcion, numProgramas, numCiudades`.
+
+Reglas de negocio: id y nombre únicos; debe transmitir en FM (87.5–108.0 MHz), en AM
+(530–1710 kHz) o en ambas; al menos 1 locutor y 1 ciudad; programas no negativos.
+
+| Método | Ruta | Rol |
+|---|---|---|
+| GET | `/api/emisoras` | cualquier usuario autenticado |
+| GET | `/api/emisoras/{id}` | cualquier usuario autenticado |
+| POST | `/api/emisoras` | ADMIN |
+| PUT | `/api/emisoras/{id}` | ADMIN |
+| DELETE | `/api/emisoras/{id}` | ADMIN |
+
+Primero se obtiene el token con `POST /api/auth/login` (`admin@example.com` / `Admin1234!`).
+
+### Ejecutar con Docker Compose
+
+```bash
+docker compose up --build
+```
+
+Levanta MySQL 8.4 (con `schema.sql`: tablas `users` y `emisoras` y datos iniciales) y la API en
+`http://localhost:8080`. Swagger: `http://localhost:8080/swagger-ui.html`.
+
+### Postman
+
+Importar `postman/Emisoras.postman_collection.json` y ejecutarla en orden con el Collection
+Runner (login, listar, crear, duplicado, validaciones, consultar, actualizar, eliminar).
+Para probar en la nube basta con cambiar la variable `baseUrl`.
+
+### GitHub Actions
+
+`.github/workflows/ci-cd.yml` compila y ejecuta las pruebas en cada push y pull request,
+construye la imagen Docker y, en `main`, llama al Deploy Hook de Render si existe el secreto
+`RENDER_DEPLOY_HOOK_URL`.
+
 ## Despliegue en Render
 
 El archivo `render.yaml` define el servicio web, el build con Docker y el despliegue
