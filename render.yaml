@@ -1,10 +1,10 @@
 services:
   - type: web
-    name: users-management-api
+    name: emisoras-api
     runtime: docker
     plan: free
     branch: main
-    autoDeployTrigger: commit
+    autoDeployTrigger: "off" # lo dispara GitHub Actions cuando pasan las pruebas
     healthCheckPath: /health
     envVars:
       - key: DB_HOST
