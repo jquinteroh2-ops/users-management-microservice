@@ -4,7 +4,7 @@ services:
     runtime: docker
     plan: free
     branch: main
-    autoDeployTrigger: "off" # lo dispara GitHub Actions cuando pasan las pruebas
+    autoDeployTrigger: commit # despliega cada commit que llega a main
     healthCheckPath: /health
     envVars:
       - key: DB_HOST
@@ -12,7 +12,7 @@ services:
       - key: DB_PORT
         sync: false
       - key: DB_NAME
-        value: crud_usuarios
+        value: emisoras_spring
       - key: DB_USERNAME
         sync: false
       - key: DB_PASSWORD
